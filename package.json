@@ -4,6 +4,8 @@
   "description": "simple kanban board",
   "main": "index.js",
   "scripts": {
+    "build": "webpack",
+    "start": "node_modules/.bin/webpack",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
@@ -22,11 +24,15 @@
   },
   "homepage": "https://github.com/shadowvzs/kanban#readme",
   "dependencies": {
+    "@material-ui/core": "^3.9.2",
+    "@types/material-ui": "^0.21.6",
     "@types/react": "^16.8.3",
     "@types/react-dom": "^16.8.1",
+    "@types/react-router-dom": "^4.3.1",
     "g": "^2.0.1",
     "react": "^16.8.1",
     "react-dom": "^16.8.1",
+    "react-router-dom": "^4.3.1",
     "webpack": "^4.29.3"
   },
   "devDependencies": {
