@@ -10,7 +10,11 @@ interface MyProps {
         textField: string;
         title: string;
         button: string;
-    }; 
+    };
+    history: any;
+    location: any;
+    match: any;
+    staticContext: any;
 }
 
 interface MyState { 
@@ -59,9 +63,10 @@ const styles : iStyles = {
 }
 
 
-class AddCard extends React.Component<MyProps,MyState> {
+class EditCard extends React.Component<MyProps,MyState> {
 
     public data : ICard;
+    public mounted : boolean;
 
     constructor(props : MyProps) {
         super(props);
@@ -71,6 +76,7 @@ class AddCard extends React.Component<MyProps,MyState> {
             opacity: 0.5,
             saved: false
         }
+        this.mounted = true;
         this.onChange = this.onChange.bind(this);
         this.onClickSave = this.onClickSave.bind(this);
     }
@@ -91,13 +97,36 @@ class AddCard extends React.Component<MyProps,MyState> {
         if (!title.length && !description.length) {
             return alert('You must complete the fields!');
         }
+        this.data.title = title;
+        this.data.description = description;
         const meta = {
-            data: { title, description },
+            data: this.data,
             success: (data : ICard) : void => {
                 this.setState({ ...this.state, saved: true })
             }
         }
-        api('/cards', 'POST', meta);        
+
+        api('/cards', 'PUT', meta);        
+    }
+
+
+    componentDidMount() : void {
+        const id = this.props.match.params.id;
+        const meta = {
+            success: (data : ICard) : void => {
+                this.data = data;
+                if (this.mounted) {
+                    const newState = { ...this.state, title: data.title, description: data.description };
+                    this.setState(newState);
+                }
+            }
+        }
+
+        api('/cards/'+id, 'GET', meta);
+    }
+
+    componentWillUnmount(){
+        this.mounted = false;
     }
 
     render() {
@@ -109,7 +138,7 @@ class AddCard extends React.Component<MyProps,MyState> {
         return (
             <div className={classes.container}>
                 { this.state.saved ? <Redirect to="/" /> : null }
-                <h2 className={classes.title}> New Card </h2>
+                <h2 className={classes.title}> Edit Card </h2>
 
                 <TextField
                     label="Title"
@@ -145,4 +174,4 @@ class AddCard extends React.Component<MyProps,MyState> {
 }
 
 
-export default withStyles(styles)(AddCard);
+export default withStyles(styles)(EditCard);

@@ -16,11 +16,6 @@ interface MyState {
     anchorEl?: HTMLElement|null;
 }
 
-interface MyStyle {
-    link : object
-}
-
-
 const styles = {
     link: {
         textDecoration: 'none',
@@ -43,13 +38,13 @@ class ToggleMenu extends React.Component  <MyProps, MyState> {
     };
 
     handleClose = () : void => {
-        console.log(this.state);
         this.setState({ anchorEl: null });
     };
 
     render() {
         const { anchorEl } = this.state;
         const open = Boolean(anchorEl);
+        const ToHome = () => <Link to={`/home`} className={this.props.classes.link} />
         return (
             <div>
                 <Button
@@ -66,18 +61,23 @@ class ToggleMenu extends React.Component  <MyProps, MyState> {
                     onClose={this.handleClose}
                     TransitionComponent={Fade}
                 >
-                
-                    <MenuItem onClick={this.handleClose}>
-                        <Link to={`/`} className={this.props.classes.link}> Home </Link>
-                    </MenuItem>
+                    <Link to={`/`} className={this.props.classes.link}>
+                        <MenuItem onClick={this.handleClose}>
+                            Home
+                        </MenuItem>
+                    </Link>
 
-                    <MenuItem onClick={this.handleClose}>
-                        <Link to={`/add-card`} className={this.props.classes.link}> New Card </Link>
-                    </MenuItem>
+                    <Link to={`/add`} className={this.props.classes.link}>
+                        <MenuItem onClick={this.handleClose}>
+                            New Card
+                        </MenuItem>
+                    </Link>
 
-                    <MenuItem onClick={this.handleClose}>
-                        <Link to={`/add-column`} className={this.props.classes.link}> New Column </Link>
-                    </MenuItem>   
+                    <Link to={`/category`} className={this.props.classes.link}>
+                        <MenuItem onClick={this.handleClose}>
+                            Category
+                        </MenuItem>
+                    </Link>
 
                 </Menu>
             </div>
