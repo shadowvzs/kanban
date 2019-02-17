@@ -1,50 +1,46 @@
 import * as React from 'react';
-import Button from '@material-ui/core/Button';
-import TextField from '@material-ui/core/TextField';
-import Dialog from '@material-ui/core/Dialog';
-import DialogActions from '@material-ui/core/DialogActions';
-import DialogContent from '@material-ui/core/DialogContent';
-import DialogContentText from '@material-ui/core/DialogContentText';
-import DialogTitle from '@material-ui/core/DialogTitle';
-import { withStyles } from '@material-ui/core';
+import { 
+    Button, 
+    TextField,
+    Dialog,
+    DialogActions, 
+    DialogContent, 
+    DialogContentText,
+    DialogTitle,
+} from '@material-ui/core';
 
 import ICategory from '../../types/ICategory';
 
 interface MyProps {
-    classes : {
-
-    },
-    settings: any;//ICategory;
+    settings: ICategory;
     open : boolean;
     onClickClose : any;
     onClickDelete: any;
-
+    onClickSave: any;
 }
 
 interface MyState {
+    id: string;
     title: string;
     description: string;
     color: string;
 }
 
-interface IStyles { 
-
-}
-
-const styles : IStyles = {
-
-}
-
 class MyDialog extends React.PureComponent<MyProps,MyState> {
     
+    public fields : string[];
+
     constructor(props: MyProps) {
         super(props);
         this.state = {
+            id: props.settings.id,
             title: props.settings.title,
             description: props.settings.description,
             color: props.settings.color
         };
+        this.fields = ['title', 'description', 'publishDate'];
         this.onChange = this.onChange.bind(this);
+        this.onSave = this.onSave.bind(this);
     }
 
     onChange(ev : React.ChangeEvent<HTMLInputElement>) : void {
@@ -53,15 +49,27 @@ class MyDialog extends React.PureComponent<MyProps,MyState> {
         this.setState(newState);
     }
 
+    onSave(ev : React.MouseEvent) : void {
+        const { title, description} = this.state;
+        if (!title.length && !description.length) {
+            return alert('You must complete the fields!');
+        }        
+        this.props.onClickSave(ev, this.state);
+    }
+
     componentWillReceiveProps(nextProps : MyProps) {
-        const fields : string[] = ['color', 'title', 'description'];
+        // don't need to set state if dialog not opened
+        if (!nextProps.open) { return; }
+        const fields : string[] = ['id', 'color', 'title', 'description'];
         const newData : any = {};
         const state : any = this.state;
         fields.forEach((e : string) : void  => {
-            if (nextProps.settings[e] !== state[e]) {
+            const setting : string = nextProps.settings[e];
+            if (setting && setting !== state[e]) {
                 newData[e] = nextProps.settings[e];
             }
         });
+       
         if (Object.keys(newData).length) {
             this.setState({ ...this.state, ...newData });
         }
@@ -69,18 +77,18 @@ class MyDialog extends React.PureComponent<MyProps,MyState> {
 
     render() {
         const state = this.state;
-        const { settings, open, onClickClose, onClickDelete } = this.props;
+        const { open, onClickClose, onClickDelete } = this.props;
         return (
             <Dialog
                 open={open}
                 onClose={onClickClose}
                 aria-labelledby="form-dialog-title"
             >
-                <DialogTitle id="form-dialog-title">{settings.title}</DialogTitle>
+                <DialogTitle id="form-dialog-title">{state.title}</DialogTitle>
+                
                 <DialogContent>
                     <DialogContentText>
-                        To subscribe to this website, please enter your email address here. We will send
-                        updates occasionally.
+                        You can do few modification here...
                     </DialogContentText>
                     <TextField
                         autoFocus
@@ -113,12 +121,13 @@ class MyDialog extends React.PureComponent<MyProps,MyState> {
                         fullWidth
                     />                
                 </DialogContent>
+
                 <DialogActions>
                     <Button 
                         variant="contained"
                         color="primary" 
                         size="small" 
-                        onClick={onClickClose} 
+                        onClick={this.onSave} 
                     >
                         Save
                     </Button>            
@@ -130,19 +139,21 @@ class MyDialog extends React.PureComponent<MyProps,MyState> {
                     >
                         Cancel
                     </Button>
+                    
                     <Button 
                         variant="contained"
                         color="secondary" 
                         size="small"                 
-                        onClick={onClickDelete} 
+                        onClick={ (ev : React.MouseEvent) : void => { onClickDelete(ev, this.state.id) }} 
                     >
                         Delete
-                    </Button>
+                    </Button>                    
+
                 </DialogActions>
             </Dialog>
         )
     }
 }
 
-export default withStyles(styles)(MyDialog);
+export default MyDialog;
 

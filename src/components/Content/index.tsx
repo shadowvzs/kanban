@@ -21,6 +21,11 @@ interface MyState {
     [key : string] : any;
 }
 
+
+interface ISelf {
+    [index : string] : any;
+}
+
 interface IStyles { 
     content: any 
 }
@@ -53,15 +58,21 @@ class Content extends React.Component<MyProps, MyState> {
         this.state = {
             categories: {},
             category: defaultSettings,
-            open: false
+            open: false,
+            fields: []
         };
+        const self : ISelf = this;
         this.mounted = true;
-        this.onClickCardDelete = this.onClickCardDelete.bind(this);
-        this.onClickCategoryDelete = this.onClickCategoryDelete.bind(this);
-        this.onClickOpen = this.onClickOpen.bind(this);
-        this.onClickClose = this.onClickClose.bind(this);
-        this.onDragStart = this.onDragStart.bind(this);
-        this.onDrop = this.onDrop.bind(this);
+        // lets bind everythings
+        [
+            'onClickCardDelete',
+            'onClickCategoryDelete',
+            'onClickCategorySave',
+            'onClickOpen',
+            'onClickClose',
+            'onDragStart',
+            'onDrop'
+        ].forEach((e :string) : void => { self[e] = self[e].bind(self); } );
         // well, easier if we store here the event data at dragStart 
         // then we can get it at onDrop, but that too easy
         // and i use dataTransfer
@@ -83,26 +94,32 @@ class Content extends React.Component<MyProps, MyState> {
         api('/cards/'+card.id, 'DELETE', meta);
     }
 
-    onClickCategoryDelete(ev : React.MouseEvent<HTMLElement>, category : ICard) : void {
-        const id = category.id;
-        const state = this.state;
-        console.log(state);
-        
+    onClickCategoryDelete(ev : React.MouseEvent<HTMLElement>, category_id : string) : void {
+        const state = { ...this.state };
+
         const meta = {
             success: (data : any) : void => {
-                console.log('------')
-                //const categories = {...state.categories};
-                //if (!data) { return console.log('Something went wrong!'); }
-                //if (!categories[id]) { return; }
-                //delete categories[id];
-                //this.setState({...state, categories, open: false});
+                if (!data) { return console.log('Something went wrong!'); }
+                const categories = {...state.categories};
+                delete categories[category_id];
+                const category_keys = Object.keys(categories);
+                if (category_keys[0]) {
+                    // lets move the cards from deleted category to the first category
+                    state[category_id].forEach((card : ICard) : void => {
+                        // update category on cards
+                        card.category = category_keys[0];
+                    });
+                    // copy cards from deleted category t the first category
+                    state[category_keys[0]].push(...state[category_id]);
+                    delete state[category_id];
+                }
+                this.setState({...state, categories, open: false});
             }
         }
-        api('/categories/'+id, 'DELETE', meta);
-        
+        api('/categories/'+category_id, 'DELETE', meta);
     }    
 
-    onClickOpen = (category : ICategory) : void => {
+    onClickOpen = (ev : React.MouseEvent<HTMLElement>, category : ICategory) : void => {
         this.setState({ ...this.state, category: category, open: true });
     };
     
@@ -114,12 +131,26 @@ class Content extends React.Component<MyProps, MyState> {
         ev.dataTransfer.setData("card", JSON.stringify(e));
     }
  
+    onClickCategorySave(ev : React.MouseEvent, category : ICategory) : void {
+
+        const meta = {
+            data: category,
+            success: (data : ICategory) : void => {
+                const categories = { ...this.state.categories, [category.id] : category };
+                this.setState({ ...this.state, categories, open: false })
+            }
+        }
+
+        api('/categories', 'PUT', meta);        
+    }
+
     async onDrop(ev : React.DragEvent, category : string) : Promise<void> {
         const data : ICard = JSON.parse(ev.dataTransfer.getData("card"));
         const prevCategory = data.category;
         if (category !== prevCategory) {
             const state = this.state;
             const index = state[prevCategory].findIndex((e : any) : boolean => data.id === e.id);
+            console.log(data,state[prevCategory])
             if (index === -1) { return console.log('Item not exist'); }
             data.category = category;
             // ------- a lil hard code part for add date if we drop into published category
@@ -179,6 +210,7 @@ class Content extends React.Component<MyProps, MyState> {
                     open={state.open}
                     onClickClose={this.onClickClose} 
                     settings={state.category}
+                    onClickSave={this.onClickCategorySave}
                     onClickDelete={this.onClickCategoryDelete}
                 />
 
@@ -191,7 +223,7 @@ class Content extends React.Component<MyProps, MyState> {
                                     onDragStart={this.onDragStart}
                                     onDrop={this.onDrop}
                                     onClickOpen={this.onClickOpen}
-                                    onClickDelete={this.onClickCardDelete}
+                                    onClickDeleteCard={this.onClickCardDelete}
                                 />
                         }
                     )

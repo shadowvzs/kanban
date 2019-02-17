@@ -1,7 +1,7 @@
 import * as React from "react";
 import { Redirect } from 'react-router-dom';
 import { withStyles, TextField, Button } from '@material-ui/core';
-import ICard from '../../types/ICard';
+import ICategory from '../../types/ICard';
 import api from '../../service';
 
 interface MyProps { 
@@ -20,6 +20,7 @@ interface MyProps {
 interface MyState { 
     title: string;
     description: string;
+    color: string;
     opacity: number;
     saved: boolean;
 }
@@ -65,18 +66,17 @@ const styles : iStyles = {
 
 class Category extends React.Component<MyProps,MyState> {
 
-    public data : ICard;
-    public mounted : boolean;
+    public data : ICategory;
 
     constructor(props : MyProps) {
         super(props);
         this.state = {
             title: '',
             description: '',
+            color: '',
             opacity: 0.5,
             saved: false
         }
-        this.mounted = true;
         this.onChange = this.onChange.bind(this);
         this.onClickSave = this.onClickSave.bind(this);
     }
@@ -93,40 +93,24 @@ class Category extends React.Component<MyProps,MyState> {
     }
 
     onClickSave(ev : React.MouseEvent) : void {
-        const { title, description} = this.state;
+        const { title, description, color } = this.state;
         if (!title.length && !description.length) {
             return alert('You must complete the fields!');
         }
-        this.data.title = title;
-        this.data.description = description;
-        const meta = {
-            data: this.data,
-            success: (data : ICard) : void => {
+        
+        const data = {
+            title,
+            description,
+            color
+        }
+          const meta = {
+            data: data,
+            success: (data : ICategory) : void => {
                 this.setState({ ...this.state, saved: true })
             }
         }
 
-        api('/cards', 'PUT', meta);        
-    }
-
-
-    componentDidMount() : void {
-        const id = this.props.match.params.id;
-        const meta = {
-            success: (data : ICard) : void => {
-                this.data = data;
-                if (this.mounted) {
-                    const newState = { ...this.state, title: data.title, description: data.description };
-                    this.setState(newState);
-                }
-            }
-        }
-
-        api('/cards/'+id, 'GET', meta);
-    }
-
-    componentWillUnmount(){
-        this.mounted = false;
+        api('/categories', 'POST', meta);        
     }
 
     render() {
@@ -138,7 +122,7 @@ class Category extends React.Component<MyProps,MyState> {
         return (
             <div className={classes.container}>
                 { this.state.saved ? <Redirect to="/" /> : null }
-                <h2 className={classes.title}> Edit Card </h2>
+                <h2 className={classes.title}> Add Category </h2>
 
                 <TextField
                     label="Title"
@@ -155,6 +139,16 @@ class Category extends React.Component<MyProps,MyState> {
                     value={this.state.description}
                     name="description"
                     type="search"
+                    onChange={this.onChange}
+                    className={classes.textField}
+                    margin="normal"
+                />
+
+                <TextField
+                    label="Background"
+                    value={this.state.color}
+                    name="color"
+                    type="color"
                     onChange={this.onChange}
                     className={classes.textField}
                     margin="normal"

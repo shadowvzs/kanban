@@ -2,8 +2,6 @@ import * as React from 'react';
 import { withStyles, Typography } from '@material-ui/core';
 import ToggleManu from './ToggleMenu';
 
-
-
 interface MyPorps { 
     classes: {
         header: string
@@ -19,7 +17,8 @@ const styles : IStyles = {
         borderBottom: '1px solid rgba(0,0,0,0.5)',
         display: 'flex',
         justifyContent: 'space-between',
-        padding: '0 20px'
+        padding: '0 20px',
+        lineHeight: '2'
     }
 }
 

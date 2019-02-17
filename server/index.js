@@ -95,10 +95,11 @@ app.put("/:type", async (request, response) => {
             return response.status(500).send(type + ' not found!');
         }
 
-        items[index] = newItem;
+        // update the item with new properties
+        items[index] = { ...items[index], ...newItem };
         saveData(items, type);
 
-        return response.send(newItem);
+        return response.send(items[index]);
     } catch (error) {
         return response.status(500).send(error.message);
     }

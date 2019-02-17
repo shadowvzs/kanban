@@ -1,10 +1,12 @@
 import * as React from 'react';
-import Button from '@material-ui/core/Button';
-import Menu from '@material-ui/core/Menu';
-import MenuItem from '@material-ui/core/MenuItem';
-import Fade from '@material-ui/core/Fade';
 import { Link } from 'react-router-dom';
-import { withStyles } from '@material-ui/core';
+import { 
+    withStyles,
+    Button,
+    Menu,
+    MenuItem,
+    Fade
+} from '@material-ui/core';
 
 interface MyProps {
     classes: {
@@ -67,15 +69,15 @@ class ToggleMenu extends React.Component  <MyProps, MyState> {
                         </MenuItem>
                     </Link>
 
-                    <Link to={`/add`} className={this.props.classes.link}>
+                    <Link to={`/card/new`} className={this.props.classes.link}>
                         <MenuItem onClick={this.handleClose}>
                             New Card
                         </MenuItem>
                     </Link>
 
-                    <Link to={`/category`} className={this.props.classes.link}>
+                    <Link to={`/category/new`} className={this.props.classes.link}>
                         <MenuItem onClick={this.handleClose}>
-                            Category
+                            New Category
                         </MenuItem>
                     </Link>
 
